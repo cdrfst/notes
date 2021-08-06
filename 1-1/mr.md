@@ -12,4 +12,4 @@
 
 ![image-20210513125725560](images\image-20210513125725560.png)
 
-3.保证reduceTask数量是1个(默认)
+3.保证reduceTask数量是1个(默认) END
