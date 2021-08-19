@@ -1,6 +1,6 @@
-## 第三阶段模块二
 
-### 作业1
+
+### part1
 
 ​	**用拉链表实现核心交易分析中DIM层商家维表，并实现该拉链表的回滚**
 
@@ -171,7 +171,7 @@ sh rollbackshopszipper.sh 2020-07-12
 
 ![image-20210818095211871](images\image-20210818095211871.png)
 
-### 作业2
+### part2
 
 #### 沉默会员数
 
@@ -215,7 +215,7 @@ sh lastDaies.sh 7
 sh lastDaies.sh 30
 ```
 
-### 作业3
+### part3
 
 思路：设计一张dwd层表 dwd.dwd_trade_orders 将ods层数据去重保证每个订单保留一条记录
 
