@@ -3,9 +3,6 @@
 
 ​	**用拉链表实现核心交易分析中DIM层商家维表，并实现该拉链表的回滚**
 
-test image-r
-![这里是图片描述](images/image-20210811144010736.png)
-
 #### 加载ods层数据
 
 ods_load_trade.sh
