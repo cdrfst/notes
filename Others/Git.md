@@ -41,5 +41,15 @@ ssh-keygen -t rsa -C "22369xxxx@qq.com"
 
 以上代码省略了-f参数，因此运行上面那条命令之后会让你输入一个文件名.
 
+## 命令
+
+暂存区：存取、删除
+命令	说明
+git add.、git stash	提交到暂存区
+git stash	暂存工作区修改的内容：保存到暂存区（可以提N次）
+git stash pop	恢复暂存的工作区内容：从暂存区取出（最近一次）
+git stash list	查询工作区所有stash的列表
+git stash apply stash@{2}	查询后，恢复第二次提交的
+git stash clear	清空暂存区的所有stash
 
 
