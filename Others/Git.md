@@ -1,4 +1,3 @@
-1
 
 ## 拉取指定分支版本
 
@@ -40,6 +39,33 @@ ssh-keygen -t rsa -C "22369xxxx@qq.com"
 -f：指定密钥文件存储文件名
 
 以上代码省略了-f参数，因此运行上面那条命令之后会让你输入一个文件名.
+
+### 代理设置
+```shell
+#全局设置
+git config --global https.proxy http://127.0.0.1:1080
+git config --global https.proxy https://127.0.0.1:1080
+#取消全局代理
+git config --global --unset http.proxy
+git config --global --unset https.proxy
+
+#只对github.com
+git config --global http.https://github.com.proxy socks5://127.0.0.1:1080
+#取消代理
+git config --global --unset http.https://github.com.proxy)
+
+```
+
+### 遇到的问题
+```shell
+stepb@PVE-DESKTOP MINGW64 /d/git/notes (main)
+$ ssh -T git@github.com
+Hi cdrfst! You\'ve successfully authenticated, but GitHub does not provide shell access.
+
+#解决办法把远程clone的url改成ssh的,执行如下指令后上面的测试指令依然报错但却可以git push了
+git remote set-url origin git@github.com:cdrfst/notes.git
+
+```
 
 ## 命令
 
