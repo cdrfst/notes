@@ -40,6 +40,35 @@ ssh-keygen -t rsa -C "22369xxxx@qq.com"
 
 以上代码省略了-f参数，因此运行上面那条命令之后会让你输入一个文件名.
 
+### 新建config文件
+	在 `~/.ssh` 目录下新建一个config文件，添加如下内容
+```shell
+#gitee
+#Host gitee.com
+#HostName gitee.com
+#User xxxxx
+#PreferredAuthentications publickey
+#IdentityFile ~/.ssh/gitee_id_rsa
+
+#github
+Host github.com
+HostName github.com
+User cdrfst
+PreferredAuthentications publickey
+IdentityFile ~/.ssh/id_rsa
+
+```
+此时 ~/.ssh 目录下有如下文件
+```shell
+config      
+github_rsa.pub  
+id_rsa.pub   
+known_hosts.old
+github_rsa  
+id_rsa          
+known_hosts
+```
+
 ### 代理设置
 ```shell
 #全局设置

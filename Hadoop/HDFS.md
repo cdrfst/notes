@@ -5,9 +5,10 @@
 2. 在主namenode上执行 hdfs namenode -format
 3. 在主namenode上执行  hadoop-daemon.sh start namenode
 4. 在未格式化的namenode上执行 hdfs namenode -bootstrapStandby
-5. 在主namenode上执行 hdfs zkfc -formatZK
-6. start-dfs.sh
-7. 在resourceManager节点上执行 start-yarn.sh
+5. 在未格式化的namenode上启动namenode
+6. 在主namenode上执行 hdfs zkfc -formatZK
+7. start-dfs.sh
+8. 在resourceManager节点上执行 start-yarn.sh
 
 ## 遇到的问题
 
@@ -20,7 +21,8 @@
 + 为master2加了到其它节点的互信后依然不行
 
 解决办法：
-停止hdfs服务后在主namenode节点上 执行 hdfs zkfc -formatZK
+1. 停止hdfs服务后在主namenode节点上 执行 hdfs zkfc -formatZK
+2. 手动指定active节点(未测试) ``hdfs haadmin -transitionToActive --forcemanual nn1
 
 ### hdfs java.net.UnknownHostException
 背景描述：

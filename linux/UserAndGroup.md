@@ -13,7 +13,14 @@ ecm:x:1000:ecm
 
 # 组管理
 
-主组和辅助组
+## 主组和辅助组
+
+给用户添加辅助组: 
+	建议使用`gpasswd`命令而不是`usermod`，因为`usermod -G`命令如果不写全用户的附属组，会清空之前的所有附属组
+
+```shell
+gpasswd -a tiaf sudoer
+```
 
 
 # sudo

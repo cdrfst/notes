@@ -44,7 +44,7 @@ yum-utils-1.1.31-54.el7_8.noarch.rpm
 
 ``` shell
 rpm -ivh python-urlgrabber-3.10-10.el7.noarch.rpm --replacefiles
-rpm -ivh yum-metadata-parser-1.1.4-10.el7.x86_64.rpm yum-3.4.3-168.el7.centos.noarch.rpm yum-plugin-fastestmirror-1.1.31-54.el7_8.noarch.rpm
+rpm -ivh yum-metadata-parser-1.1.4-10.el7.x86_64.rpm yum-3.4.3-168.el7.centos.noarch.rpm yum-plugin-fastestmirror-1.1.31-54.el7_8.noarch.rpm wget-1.14-18.el7_6.1.x86_64.rpm
 ```
 
 下载阿里镜像配置
@@ -76,3 +76,16 @@ http://mirrors.cloud.aliyuncs.com/centos/7/os/x86_64/repodata/repomd.xml: [Errno
 >>#添加以下dns
 >> nameserver 8.8.8.8
 >> nameserver 114.114.114.114
+
+## 仅下载不安装
+
+^74cd60
+
+### 1.安装 yum-downloadonly 插件
+``` shell
+yum install yum-downloadonly
+```
+### 2.使用方法
+``` shell
+yum install salt --downloadonly --downloaddir=/tmp
+```
