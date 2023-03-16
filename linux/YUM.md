@@ -49,7 +49,11 @@ rpm -ivh yum-metadata-parser-1.1.4-10.el7.x86_64.rpm yum-3.4.3-168.el7.centos.no
 
 下载阿里镜像配置
 ``` shell
-wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo
+# 配置centos的base源和epel源为阿里源  
+ wget -O /etc/yum.repos.d/CentOS-Base.repo https://mirrors.aliyun.com/repo/Centos-7.repo  
+ wget -O /etc/yum.repos.d/epel.repo http://mirrors.aliyun.com/repo/epel-7.repo  
+ yum clean all  
+ yum makecache fast
 修改刚下载的文件使用查找替换方式，(:%s/$releasever/7/g)，将所有$releasever替换为7
 ```
 

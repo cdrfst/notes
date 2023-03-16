@@ -46,3 +46,20 @@ lsblk  树形显示磁盘和分区
 2. 进入虚拟机系统中安装 qemu-guest-agent
 	1. windows 在virtio-win-0.1.225.iso 中的 guest-agent文件夹中
 	2. linux 虚机机可执行安装命令  ``apt-get install qemu-guest-agent
+
+# 有时虚拟节点网络无法连接
+常见于 windows 节点无法远程访问
+[引用](https://www.cnblogs.com/nf01/p/16296724.html)
+
+问题错误日志：
+vi /var/log/syslog
+异常信息：``e1000e 0000:00:1f.6 eno1: Detected Hardware Unit Hang
+
+```shell
+#如果没有ethtool工具可以执行如下命令安装： 
+apt install ethtool 
+#禁用 tcp 分段卸载和通用分段卸载
+ethtool -K eno1 tso off gso off
+
+#2023/2/6 9:54 执行完的命令，观察中。。。
+```
