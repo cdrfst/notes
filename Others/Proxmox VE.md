@@ -63,3 +63,12 @@ ethtool -K eno1 tso off gso off
 
 #2023/2/6 9:54 执行完的命令，观察中。。。
 ```
+
+# 手动删除Snapshot
+
+```shell
+# qm unlock VMID
+qm unlock 100
+# qm delsnapshot VMID snapshotname --force
+qm delsnapshot 100 testsnapshot --force
+```

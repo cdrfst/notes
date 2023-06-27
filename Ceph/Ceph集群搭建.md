@@ -485,6 +485,14 @@ sudo -u ceph mkdir /var/lib/ceph/mon/ceph-asianux76-a
 ##sudo -u ceph ceph-mon [--cluster {cluster-name}] --mkfs -i {hostname} --monmap /tmp/monmap --keyring /tmp/ceph.mon.keyring
 sudo -u ceph ceph-mon --mkfs -i asianux76-a --monmap /tmp/monmap --keyring /tmp/ceph.mon.keyring
 
+#16.检查/etc/ceph/ceph.conf
+
+#17.启动mon服务
+sudo systemctl start ceph-mon@`homename -s`
+
+#18.查看ceph集群状态
+ceph -s
+
 ```
 
 
