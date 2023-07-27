@@ -1,5 +1,5 @@
 
-## 必备条件
+## 一、必备条件
 ### 1. python3
 
 引用地址: https://blog.csdn.net/QIU176161650/article/details/118784155
@@ -11,7 +11,7 @@ sudo yum install -y --downloadonly --downloaddir=/home/tiaf/python3pkgs zlib-dev
 sudo yum localinstall *.rpm
 
 #下载python3
-wget -P /home/tiaf/offline_env_file/python3 https://www.python.org/ftp/python/3.9.6/Python-3.9.6.tar.xz
+wget -P /root/offline_env_file/python3 https://www.python.org/ftp/python/3.9.6/Python-3.9.6.tar.xz
 
 #解压
 tar xf Python-3.9.6.tar.xz
@@ -27,10 +27,10 @@ mv /usr/bin/python /usr/bin/python2
 mv /usr/bin/pip /usr/bin/pip2
 
 #创建新版链接
-ln -s /usr/local/python3.9.6/bin/python3 /usr/bin/python3
-ln -s /usr/bin/python3 /usr/bin/python
-ln -s /usr/local/python3.9.6/bin/pip3 /usr/bin/pip3
-ln -s /usr/bin/pip3 /usr/bin/pip
+ln -sf /usr/local/python3.9.6/bin/python3 /usr/bin/python3
+ln -sf /usr/bin/python3 /usr/bin/python
+ln -sf /usr/local/python3.9.6/bin/pip3 /usr/bin/pip3
+ln -sf /usr/bin/pip3 /usr/bin/pip
 
 #修改yum命令的配置文件（yum命令默认为Python2来执行），这里需要修改两个配置文件/usr/bin/yum 和 /usr/libexec/urlgrabber-ext-down  修改文件第一行内容，如下所示
 #!/usr/bin/python  修改为 #!/usr/bin/python2
@@ -47,7 +47,7 @@ vi /etc/selinux/config
 #关闭防火墙
 systemctl stop firewalld & systemctl disable firewalld & systemctl status firewalld
 ```
-## 内网时间同步
+## 内网时间同步到秒
 
 https://www.cnblogs.com/xiongty/p/14886447.html
 
@@ -55,18 +55,168 @@ https://www.cnblogs.com/xiongty/p/14886447.html
 ## 加入sudoers
 ## 配置互信
 
-## Centos7 or RH7
+## 二、配置离线yum仓库
+
+### 下载离线源文件
+
+- x86
+```shell
+#!/usr/bin/env bash
+
+URL_REPO=https://mirrors.tuna.tsinghua.edu.cn/ceph/rpm-15.2.17/el7/x86_64/
+URL_REPODATA=https://mirrors.tuna.tsinghua.edu.cn/ceph/rpm-15.2.17/el7/x86_64/repodata/
+
+function get_repo()
+{
+test -d ceph_repo || mkdir ceph_repo
+cd ceph_repo
+
+for i in `curl -k $URL_REPO | awk -F '"' '{print $4}' | grep rpm`;do
+    curl -kO $URL_REPO/$i
+done
+}
+
+function get_repodata()
+{
+test -d ceph_repo/repodata || mkdir ceph_repo/repodata
+cd ceph_repo/repodata
+
+for i in `curl -k $URL_REPODATA | awk -F '"' '{print $4}' | grep xml`;do
+    curl -kO $URL_REPODATA/$i
+done
+}
+
+if [ $1 == 'repo' ];then 
+    get_repo
+elif [ $1 == 'repodata' ];then
+    get_repodata
+elif [ $1 == 'all' ];then
+    get_repo
+    get_repodata
+else
+    echo '请输入其中一个参数[ repo | repodata | all ]'
+fi
+
+```
+- aarch64
+```shell
+#!/usr/bin/env bash
+
+URL_REPO=https://mirrors.tuna.tsinghua.edu.cn/ceph/rpm-15.2.17/el7/aarch64/
+URL_REPODATA=https://mirrors.tuna.tsinghua.edu.cn/ceph/rpm-15.2.17/el7/aarch64/repodata/
+
+function get_repo()
+{
+test -d ceph_repo || mkdir ceph_repo
+cd ceph_repo
+
+for i in `curl -k $URL_REPO | awk -F '"' '{print $4}' | grep rpm`;do
+    curl -kO $URL_REPO/$i
+done
+}
+
+function get_repodata()
+{
+test -d ceph_repo/repodata || mkdir ceph_repo/repodata
+cd ceph_repo/repodata
+
+for i in `curl -k $URL_REPODATA | awk -F '"' '{print $4}' | grep xml`;do
+    curl -kO $URL_REPODATA/$i
+done
+}
+
+if [ $1 == 'repo' ];then 
+    get_repo
+elif [ $1 == 'repodata' ];then
+    get_repodata
+elif [ $1 == 'all' ];then
+    get_repo
+    get_repodata
+else
+    echo '请输入其中一个参数[ repo | repodata | all ]'
+fi
+
+```
+- noarch
+```shell
+#!/usr/bin/env bash
+
+URL_REPO=https://mirrors.tuna.tsinghua.edu.cn/ceph/rpm-15.2.17/el7/noarch/
+URL_REPODATA=https://mirrors.tuna.tsinghua.edu.cn/ceph/rpm-15.2.17/el7/noarch/repodata/
+
+function get_repo()
+{
+test -d ceph_repo || mkdir ceph_repo
+cd ceph_repo
+
+for i in `curl -k $URL_REPO | awk -F '"' '{print $4}' | grep rpm`;do
+    curl -kO $URL_REPO/$i
+done
+}
+
+function get_repodata()
+{
+test -d ceph_repo/repodata || mkdir ceph_repo/repodata
+cd ceph_repo/repodata
+
+for i in `curl -k $URL_REPODATA | awk -F '"' '{print $4}' | grep xml`;do
+    curl -kO $URL_REPODATA/$i
+done
+}
+
+if [ $1 == 'repo' ];then 
+    get_repo
+elif [ $1 == 'repodata' ];then
+    get_repodata
+elif [ $1 == 'all' ];then
+    get_repo
+    get_repodata
+else
+    echo '请输入其中一个参数[ repo | repodata | all ]'
+fi
+
+```
+
+以上脚本会生成离线安装源文件分别是：
+ceph_x86_repo.gtz 、ceph_noarch_repo.gtz、ceph_arm_repo.gtz
+
+### 安装Nginx
+安装nginx后启动，将上一步的三个离线包分别解压到nginx的默认根目录测试能访问即可
+
+### 配置yum源
+ceph-http-diy.repo
+```shell
+[ceph]
+name=Ceph packages for 
+baseurl=http://127.0.0.1/ceph_x86_repo
+enabled=1
+priority=1
+gpgcheck=1
+gpgkey=https://download.ceph.com/keys/release.asc
+
+[ceph-noarch]
+name=Ceph noarch packages
+baseurl=http://127.0.0.1/ceph_noarch_repo
+enabled=1
+priority=1
+gpgcheck=1
+gpgkey=https://download.ceph.com/keys/release.asc
+
+```
+
+
+## 三、安装Ceph (Centos7 or RH7 or Asianux7)
 
 https://www.cnblogs.com/weiwei2021/p/14060186.html
 
 ``` shell
-#离线下载ceph-deploy
-sudo yum -y install --downloadonly --downloaddir=/home/tiaf/cephcentos7/ceph-deploy/ ceph-deploy python-pip
+#一、直接安装
+sudo yum install -y ceph
 
-#离线下载ceph (离线安装下面包时还会自动下载一些依赖,如环境不同需要每台单独执行)
+#二、也可制作离线ceph安装包 (离线安装下面包时还会自动下载一些依赖,如环境不同需要每台单独执行)
 sudo yum -y install --downloadonly --downloaddir=/home/tiaf/cephcentos7/ceph/ ceph  ceph-radosgw
 
-# 本地安装
+#2.1.本地安装
 sudo yum localinstall *.rpm
 ```
 
@@ -133,7 +283,7 @@ sudo yum -y install --downloadonly --downloaddir=/home/tiaf/offline/ceph/ ceph  
 ```
 
 
-切换到ceph用户:
+
 1. 下载cephadm
 ``` shell
 curl --silent --remote-name --location https://github.com/ceph/ceph/raw/quincy/src/cephadm/cephadm
@@ -475,7 +625,7 @@ sudo chown ceph:ceph /tmp/ceph.mon.keyring
 
 #13.Generate a monitor map using the hostname(s), host IP address(es) and the FSID. Save it as `/tmp/monmap`:
 ##monmaptool --create --add {hostname} {ip-address} --fsid {uuid} /tmp/monmap
-monmaptool --create --add asianux76-a 192.168.3.21 --fsid a7f64266-0894-4f1e-a635-d0aeaca0e993 /tmp/monmap
+monmaptool --create --add `hostname -s` 192.168.3.21 --fsid a7f64266-0894-4f1e-a635-d0aeaca0e993 /tmp/monmap
 
 #14.Create a default data directory (or directories) on the monitor host(s).
 ##sudo mkdir /var/lib/ceph/mon/{cluster-name}-{hostname}
@@ -483,7 +633,7 @@ sudo -u ceph mkdir /var/lib/ceph/mon/ceph-asianux76-a
 
 #15.Populate the monitor daemon(s) with the monitor map and keyring.
 ##sudo -u ceph ceph-mon [--cluster {cluster-name}] --mkfs -i {hostname} --monmap /tmp/monmap --keyring /tmp/ceph.mon.keyring
-sudo -u ceph ceph-mon --mkfs -i asianux76-a --monmap /tmp/monmap --keyring /tmp/ceph.mon.keyring
+sudo -u ceph ceph-mon --mkfs -i `hostname -s` --monmap /tmp/monmap --keyring /tmp/ceph.mon.keyring
 
 #16.检查/etc/ceph/ceph.conf
 
@@ -736,5 +886,66 @@ yum install s3cmd -y
 s3cmd mb s3://test-bucket
 ERROR: S3 error: 403 (RequestTimeTooSkewed)
 ## 先确定时区和时间是否同步
+
+```
+
+
+#### 添加新机器到集群
+
+##### 扩展MON
+- 随便找一台正在运行的mon节点上修改ceph.conf，增加相应的mon initial members与mon host，不再赘述。然后同步到所有节点。
+- 获取集群已有的mon.keyring
+``` shell
+ceph auth get mon. -o mon.keyring
+
+```
+- 获取集群已有的mon.map
+```shell
+ceph mon getmap -o mon.map
+
+```
+- 创建监视数据目录
+```shell
+#确定以下默认目录已经存在
+#/var/lib/ceph/mon/{cluster-name}-{mon-id}/
+#例如：/var/lib/ceph/mon/ceph-asianux76-a/
+
+ceph-mon -i ceph1 --mkfs --monmap mon.map --keyring mon.keyring
+
+#以上ceph1为mon id
+```
+- 启动mon节点
+```shell
+ceph-mon -i `hostname -s` --public-addr 192.168.3.136:6789
+
+#注意ip为新节点ip  `hostname -s` 是mon的ID,可以任意
+```
+
+##### 扩展OSD
+
+###### 添加方式一：添加后osd立刻生效，会触发数据均衡
+```shell
+#1.登陆原集群任意osd节点
+scp /var/lib/ceph/bootstrap-osd/keyring newnode:$PWD
+scp /etc/ceph/ceph.client.admin.keyring /etc/ceph/ceph.conf newnode:$PWD
+
+ceph-volume lvm create --data /dev/sdb(此处替换成新节点设备名)
+
+```
+###### 以下暂未成功
+```shell
+#登陆新节点创建OSD
+ceph osd create
+#生成id 为 3
+
+#创建osd数据目录
+mkdir /var/lib/ceph/osd/ceph-3
+chown -R ceph:ceph /var/lib/ceph/osd/ceph-3
+
+#执行命令
+ceph-authtool /tmp/osd.keyring --gen-key -n osd.3
+
+ceph auth add osd.3 osd 'allow *' mon 'allow profile osd' -i /var/lib/ceph/osd/ceph-3/keyring
+
 
 ```
