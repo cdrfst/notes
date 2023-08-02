@@ -7,11 +7,16 @@ yum -y install yum-utils
 
 ```
 
-- 下载相应构架和repoid的完整rpm包
+- 同步epel仓库,下载相应构架和repoid的完整rpm包
 ```shell
 # 下载aarch64架构的epel完整包
 reposync -n --repoid=epel --arch=aarch64 -p /root/epelofflineaarch64/
 
+```
+- 生成repodata数据
+```shell
+#cd 到仓库根目录或与Packages 目录同级别目录后执行
+createrepo .
 ```
 
 # 方式二:下载全量依赖 rpm 包及离线安装

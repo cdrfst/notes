@@ -83,7 +83,7 @@ http://mirrors.cloud.aliyuncs.com/centos/7/os/x86_64/repodata/repomd.xml: [Errno
 
 ## 仅下载不安装
 
-^74cd60
+
 
 ### 1.安装 yum-downloadonly 插件
 ``` shell
@@ -92,4 +92,12 @@ yum install yum-downloadonly
 ### 2.使用方法
 ``` shell
 yum install salt --downloadonly --downloaddir=/tmp
+```
+
+## 常用命令
+
+```shell
+#查看可用的ceph 版本
+yum list ceph --showduplicates
+
 ```

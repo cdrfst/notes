@@ -34,6 +34,8 @@ ln -sf /usr/bin/pip3 /usr/bin/pip
 
 #修改yum命令的配置文件（yum命令默认为Python2来执行），这里需要修改两个配置文件/usr/bin/yum 和 /usr/libexec/urlgrabber-ext-down  修改文件第一行内容，如下所示
 #!/usr/bin/python  修改为 #!/usr/bin/python2
+vi /usr/bin/yum
+vi /usr/libexec/urlgrabber-ext-down
 
 ```
 
@@ -267,48 +269,11 @@ python3 get-pip.py
 
 ```
 
-## 红旗7.6(x86环境成功安装)
+## 红旗(x86-64-7.6/aarch64-7.5)环境成功安装ceph-15.2.5
 
-1. python3
-2. 下载epel repo
-``` shell
-sudo yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+### 离线安装
 
-su -c 'rpm -Uvh https://download.ceph.com/rpm-15.2.5/el7/noarch/ceph-release-1-1.el7.noarch.rpm'
-
-su -c 'rpm -Uvh https://download.ceph.com/rpm-15.2.5/el7/noarch/ceph-deploy-2.0.1-0.noarch.rpm'
-
-sudo yum -y install --downloadonly --downloaddir=/home/tiaf/offline/ceph/ ceph  ceph-radosgw
-
-```
-
-
-
-1. 下载cephadm
-``` shell
-curl --silent --remote-name --location https://github.com/ceph/ceph/raw/quincy/src/cephadm/cephadm
-chmod +x cephadm
-```
-
-2. 通过 ceph和版本号配置 仓库
-``` shell
-sudo ./cephadm add-repo --version 15.2.17
-```
-
-1. 安装
-``` shell
-#需要先导入一个GPG key 否则无法安装
-#此为rpm方式,apt方式请参照官方文档:https://docs.ceph.com/en/latest/install/get-packages/
-sudo rpm --import 'https://download.ceph.com/keys/release.asc'
-sudo ./cephadm install ceph-common
-sudo ./cephadm install
-#检查是否成功
-which cephadm
-```
-
-### 离线安装前尝试
-
-#### 配置Ceph本地源
+#### 1.配置Ceph本地源
 
 [可以参考](http://dbaselife.com/doc/753/)
 
@@ -368,136 +333,33 @@ gpgcheck=0
 enable=1
 EOF
 ```
-#### 安装ceph-deploy 2.0.1
 
-基于python2.7.5 离线
 
-``` shell
-## ceph需要的python环境依赖，一并装上(所有节点？)
-yum -y install ceph-common python-pkg-resources python-setuptools python2-subprocess32
 
-## 装deploy
-yum -y install ceph-deploy-2.0.1
 
-## 安装完毕后，可以查看帮助命令
-ceph-deploy --help
+
+#### 2.配置Centos7(base&updates&extras)本地仓库
+
+#### 3.安装
+##### 3.1.也可制作当前系统环境的离线安装包
+
+**以后生产环境可以直接按3.2安装而不需要配置软件源**
+
+```shell
+sudo yum install -y --downloadonly --downloaddir=/home/tiaf/ceph-15.2.5-aarch-64-full/ ceph-15.2.5 ceph-radosgw-15.2.5
+```
+##### 3.2.离线安装包安装
+```shell
+cd /home/tiaf/ceph-15.2.5-aarch-64-full/
+sudo yum localinstall -y --nogpgcheck *.rpm
 
 ```
 
-安装了pip for python2
-
-#### 集群初始化部署
+#### 错误集
 
 ``` shell
-## 初始化之前，最好提前在每个 mon 节点都将mon的包安装好，在之后的安装中程序会自动安装，提前装好是为了提前发现问题 
-yum -y install ceph-mon
-
-# 执行此命令前需要将system-release文件内容换成redhat/centos7的，否则提示不支持
-ceph-deploy new --cluster-network 192.168.3.0/8 --public-network 192.168.3.0/8 asianux76-a
-
-#初始化mon节点
-ceph-deploy mon create-initial
-# 验证初始化完成
-ps -ef | grep ceph-mon
-
-#将配置文件及Admin的key传送至目标机器,到目前只有一个mon (sudo ceph -s 可查看)
-ceph-deploy admin asianux76-a asianux76-b
-
-# 添加mgr,每个节点都要装
-sudo yum -y install ceph-mgr
-
-#添加mgr至集群
-ceph-deploy mgr create asianux76-a
-
-#初始化osd
-## 查看目标主机可用磁盘
-ceph-deploy disk list asianux76-a
-## 初始化node节点，其实就是安装ceph、ceph-radosgw和一些相关基础组件
-ceph-deploy install --no-adjust-repos --nogpgcheck asianux76-a asianux76-b
-    --no-adjust-repos表示不将本机的repo文件传输至目标机器，因为前边已经手动配置了
-    --nogpgcheck不检查yum的key
-
-## 在需要安装osd的机器中执行
-sudo yum -y install ceph-osd ceph-common
-
-# 擦除所有node节点要初始化为osd的盘的数据
-ceph-deploy disk zap ceph-node1 /dev/nvme0n1p3 /dev/nvme0n1p4 /dev/nvme0n1p5
-# 开始创建osd
-## 举例，其他盘也要相同的操作
-ceph-deploy osd create asianux76-a --data /dev/sdb
-ceph-deploy osd create asianux76-b --data /dev/sdb
-
-
-```
-至此，基本的ceph集群已经搭建成功，rbd功能已经可以开始使用。
-另外如果想要开启对象存储以及文件系统的功能，还需要部署rgw、mds和cephfs。此时的mon、mgr等组件都没实现高可用，先进行这些重要组件的横向扩展。
-
-``` shell
-# 扩展mon节点
-## 目标机器先安装ceph-mon组件
-sudo yum -y install ceph-mon ceph-common
-## 添加mon机器
-ceph-deploy mon add asianux76-b
-
-# 扩展mgr节点
-## 目标机器先安装ceph-mgr组件
-sudo yum -y install ceph-mgr ceph-common
-## 添加mgr机器
-ceph-deploy mgr create asianux76-b
-```
-
-增加mds(元数据服务)、cephfs提供文件系统功能
-
-mds服务为一个单独存储服务，想要正常运行必须要单独指定两个存储池，一个用来存储cephfs的元数据，另一个用来存储data数据，元数据池主要保存文件目录的大小名称等元数据，data池用来保存实际文件等。
-
-``` shell
-#HTTPFSUSER 
-ceph-deploy mds create asianux76-a
-ceph-deploy mds create asianux76-b
-
-#查看Ceph状态
-[tiaf@asianux76-a ~]$ sudo ceph -s
-  cluster:
-    id:     83ba32ef-935d-4303-aaed-e97c549b573a
-    health: HEALTH_WARN
-            mons are allowing insecure global_id reclaim
-            Module 'restful' has failed dependency: No module named 'pecan'
-            clock skew detected on mon.asianux76-b
-            Reduced data availability: 1 pg inactive
-            Degraded data redundancy: 1 pg undersized
-            1 slow ops, oldest one blocked for 198 sec, mon.asianux76-a has slow ops
-            OSD count 2 < osd_pool_default_size 3
-
-  services:
-    mon: 2 daemons, quorum asianux76-a,asianux76-b (age 6m)
-    mgr: asianux76-a(active, since 40m), standbys: asianux76-b
-    mds:  2 up:standby
-    osd: 2 osds: 2 up (since 14m), 2 in (since 14m)
-
-  data:
-    pools:   1 pools, 1 pgs
-    objects: 0 objects, 0 B
-    usage:   2.0 GiB used, 8.0 GiB / 10 GiB avail
-    pgs:     100.000% pgs not active
-             1 undersized+peered
-#目前mds已经加入集群，但是都处于standby(备用)状态，因为mds必须要分别指定元数据和数据的存储池：
-
-## 先创建元数据池和data池，后边是数据分别得pg和pgp的数量
-ceph osd pool create cephfs-metedata 32 32 
-ceph osd pool create cephfs-data 64 64 
 #此处报错:(在最上面把pip安装后此问题已经解决)
 [errno 2] RADOS object not found (error connecting to the cluster)
-#解决办法：先把sudo ceph -s 中的警告信息处理完
- cluster:
-    id:     83ba32ef-935d-4303-aaed-e97c549b573a
-    health: HEALTH_WARN
-            mons are allowing insecure global_id reclaim
-            Module 'restful' has failed dependency: No module named 'pecan'
-            clock skew detected on mon.asianux76-b
-            Reduced data availability: 1 pg inactive
-            Degraded data redundancy: 1 pg undersized
-            1 slow ops, oldest one blocked for 306 sec, mon.asianux76-a has slow ops
-            OSD count 2 < osd_pool_default_size 3
 
 ##1.找不到模块 'pecan' 
 当前系统默认python2.7.5 ，首先安装pip
@@ -505,96 +367,12 @@ ceph osd pool create cephfs-data 64 64
 #执行安装pip
 python get-pip.py
 #重启机器后 sudo ceph -s卡住不动(在最上面把pip安装后此问题已经解决)
-
-
-
-ceph osd lspools 
-1 device_health_metrics
-2 cephfs-metedata
-3 cephfs-data
-
-
-#创建cephfs
-ceph fs new mycephfs cephfs-metedata cephfs-data
-##成功后两次ceph -s 发现mds状态变正常,到此cephfs功能搭建完毕
-
-#增加rgw组件，提供对象存储功能
-yum -y install ceph-radosgw
-#部署
-ceph-deploy --overwrite-conf rgw create asianux76-a
-ceph-deploy --overwrite-conf rgw create asianux76-b
-
-
 ```
 
-### 按官网手动安装尝试
+### 按官网手动部署
 
+[官方文档](https://docs.ceph.com/en/octopus/install/manual-deployment/)
 
-#### Add Keys
-```
-rpm --import 'https://download.ceph.com/keys/release.asc'
-```
-包源地址：
-https://download.ceph.com/rpm-15.2.17/el7/x86_64/
-https://download.ceph.com/rpm-15.2.17/el7/aarch64/
-https://download.ceph.com/rpm-15.2.17/el7/noarch/
-搭建本地仓库省略
-配置ceph.repo
-
-To install Ceph with RPMs, execute the following steps:
-
-1.  Install `yum-plugin-priorities`.
-    
-    sudo yum install yum-plugin-priorities
-    
-2.  Ensure `/etc/yum/pluginconf.d/priorities.conf` exists.
-    
-3.  Ensure `priorities.conf` enables the plugin.
-    
-    [main]
-    enabled = 1
-    
-4.  Ensure your YUM `ceph.repo` entry includes `priority=2`. See [Get Packages](https://docs.ceph.com/en/latest/install/get-packages) for details:
-``` shell
-[ceph]
-name=Ceph packages for $basearch
-baseurl=https://download.ceph.com/rpm-{ceph-release}/{distro}/$basearch
-enabled=1
-priority=2
-gpgcheck=1
-gpgkey=https://download.ceph.com/keys/release.asc
-
-[ceph-noarch]
-name=Ceph noarch packages
-baseurl=https://download.ceph.com/rpm-{ceph-release}/{distro}/noarch
-enabled=1
-priority=2
-gpgcheck=1
-gpgkey=https://download.ceph.com/keys/release.asc
-
-[ceph-source]
-name=Ceph source packages
-baseurl=https://download.ceph.com/rpm-{ceph-release}/{distro}/SRPMS
-enabled=0
-priority=2
-gpgcheck=1
-gpgkey=https://download.ceph.com/keys/release.asc
-```
-5. Install pre-requisite packages:
-```shell
-sudo yum install snappy leveldb gdisk python-argparse gperftools-libs
-```
-如果安装argparse出错则``pip install argparse
-
-
-Once you have added either release or development packages, or added a `ceph.repo` file to `/etc/yum.repos.d`, you can install Ceph packages.
-```shell
-sudo yum install ceph
-```
-此步骤需要arm系统环境 在红旗7.6 x86中需要92个rpm包
-
-#### 手动部署
-https://docs.ceph.com/en/octopus/install/manual-deployment/
 ##### 执行第15步骤时报错
 ```shell
 sudo -u ceph ceph-mon --mkfs -i ceph-asianux76-a --monmap /tmp/monmap --keyring /tmp/ceph.mon.keyring
@@ -604,41 +382,84 @@ global_init: error reading config file.
 原因是需要在/etc/ceph/ceph.conf文件中最头部加个"[global]"的section
 
 #### 配置mon
+
 [官方文档](https://docs.ceph.com/en/octopus/install/manual-deployment/#monitor-bootstrapping)
 
+- 第1-7步可以概括为下面的ceph.conf文件
 ```shell
-#8.生成集群密钥环和mon密钥
-ceph-authtool --create-keyring /tmp/ceph.mon.keyring --gen-key -n mon. --cap mon 'allow *'
+[global]
+fsid = a7f64266-0894-4f1e-a635-d0aeaca0e993
+mon initial members = asianux76-a
+mon host = 192.168.3.21
+public network = 192.168.3.0/24
+cluster network = 192.168.3.0/24
+auth cluster required = cephx
+auth service required = cephx
+auth client required = cephx
+osd pool default size = 3
+osd pool default min size = 2
+mon_max_pg_per_osd = 1000
+osd crush chooseleaf type = 0
 
-#9.Generate an administrator keyring, generate a `client.admin` user and add the user to the keyring.
+[client.rgw.asianux76-a]
+host=asianux76-a
+keyring=/etc/ceph/ceph.client.radosgw.keyring
+log file=/var/log/radosgw/client.radosgw.gateway.log
+rgw_frontends = "civetweb port=8080"
+
+```
+- 8.生成集群密钥环和mon密钥
+```shell
+ceph-authtool --create-keyring /tmp/ceph.mon.keyring --gen-key -n mon. --cap mon 'allow *'
+```
+
+- 9.Generate an administrator keyring, generate a `client.admin` user and add the user to the keyring.
+```shell
 sudo ceph-authtool --create-keyring /etc/ceph/ceph.client.admin.keyring --gen-key -n client.admin --cap mon 'allow *' --cap osd 'allow *' --cap mds 'allow *' --cap mgr 'allow *'
 
-#10.Generate a bootstrap-osd keyring, generate a `client.bootstrap-osd` user and add the user to the keyring.
-sudo ceph-authtool --create-keyring /var/lib/ceph/bootstrap-osd/ceph.keyring --gen-key -n client.bootstrap-osd --cap mon 'profile bootstrap-osd' --cap mgr 'allow r'
+```
 
-#11.Add the generated keys to the `ceph.mon.keyring`.
+- 10.Generate a bootstrap-osd keyring, generate a `client.bootstrap-osd` user and add the user to the keyring.
+```shell
+sudo ceph-authtool --create-keyring /var/lib/ceph/bootstrap-osd/ceph.keyring --gen-key -n client.bootstrap-osd --cap mon 'profile bootstrap-osd' --cap mgr 'allow r'
+```
+
+- 11.Add the generated keys to the `ceph.mon.keyring`.
+```shell
 sudo ceph-authtool /tmp/ceph.mon.keyring --import-keyring /etc/ceph/ceph.client.admin.keyring
 sudo ceph-authtool /tmp/ceph.mon.keyring --import-keyring /var/lib/ceph/bootstrap-osd/ceph.keyring
+```
 
-#12.Change the owner for `ceph.mon.keyring`.
+- 12.Change the owner for `ceph.mon.keyring`.
+```shell
 sudo chown ceph:ceph /tmp/ceph.mon.keyring
+```
 
-#13.Generate a monitor map using the hostname(s), host IP address(es) and the FSID. Save it as `/tmp/monmap`:
+- 13.Generate a monitor map using the hostname(s), host IP address(es) and the FSID. Save it as /tmp/monmap
+```shell
 ##monmaptool --create --add {hostname} {ip-address} --fsid {uuid} /tmp/monmap
 monmaptool --create --add `hostname -s` 192.168.3.21 --fsid a7f64266-0894-4f1e-a635-d0aeaca0e993 /tmp/monmap
+```
 
-#14.Create a default data directory (or directories) on the monitor host(s).
+- 14.Create a default data directory (or directories) on the monitor host(s).
+```shell
 ##sudo mkdir /var/lib/ceph/mon/{cluster-name}-{hostname}
-sudo -u ceph mkdir /var/lib/ceph/mon/ceph-asianux76-a
+sudo -u ceph mkdir /var/lib/ceph/mon/ceph-`hostname -s`
+```
 
-#15.Populate the monitor daemon(s) with the monitor map and keyring.
+- 15.Populate the monitor daemon(s) with the monitor map and keyring.
+```shell
 ##sudo -u ceph ceph-mon [--cluster {cluster-name}] --mkfs -i {hostname} --monmap /tmp/monmap --keyring /tmp/ceph.mon.keyring
 sudo -u ceph ceph-mon --mkfs -i `hostname -s` --monmap /tmp/monmap --keyring /tmp/ceph.mon.keyring
+```
 
-#16.检查/etc/ceph/ceph.conf
+- 16.启动mon服务
 
-#17.启动mon服务
+```shell
+#启动mon服务
 sudo systemctl start ceph-mon@`homename -s`
+#开机自启动
+sudo systemctl enable ceph-mon@`homename -s`
 
 #18.查看ceph集群状态
 ceph -s
