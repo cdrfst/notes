@@ -2,6 +2,8 @@
 ## 一、必备条件
 ### 1. python3
 
+**也可通过离线安装rpm包的方式统一安装
+
 引用地址: https://blog.csdn.net/QIU176161650/article/details/118784155
 
 ``` shell
@@ -502,7 +504,7 @@ ceph-mgr -i `hostname -s`
 
 ```
 
-#### 配置Ceph Object Gateway
+#### 配置RGW
 https://zhuanlan.zhihu.com/p/441588192
 
 1. 安装radosgw
@@ -718,12 +720,10 @@ ERROR: S3 error: 403 (RequestTimeTooSkewed)
 - 获取集群已有的mon.keyring
 ``` shell
 ceph auth get mon. -o mon.keyring
-
 ```
 - 获取集群已有的mon.map
 ```shell
 ceph mon getmap -o mon.map
-
 ```
 - 创建监视数据目录
 ```shell
@@ -737,7 +737,7 @@ ceph-mon -i ceph1 --mkfs --monmap mon.map --keyring mon.keyring
 ```
 - 启动mon节点
 ```shell
-ceph-mon -i `hostname -s` --public-addr 192.168.3.136:6789
+sudo ceph-mon -i `hostname -s` --setuser ceph --setgroup ceph --public-addr 192.168.3.23:6789
 
 #注意ip为新节点ip  `hostname -s` 是mon的ID,可以任意
 ```
@@ -753,7 +753,7 @@ scp /etc/ceph/ceph.client.admin.keyring /etc/ceph/ceph.conf newnode:$PWD
 ceph-volume lvm create --data /dev/sdb(此处替换成新节点设备名)
 
 ```
-###### 以下暂未成功
+###### 添加方式二：添加后暂缓生效（以下暂未成功）
 ```shell
 #登陆新节点创建OSD
 ceph osd create
@@ -767,6 +767,37 @@ chown -R ceph:ceph /var/lib/ceph/osd/ceph-3
 ceph-authtool /tmp/osd.keyring --gen-key -n osd.3
 
 ceph auth add osd.3 osd 'allow *' mon 'allow profile osd' -i /var/lib/ceph/osd/ceph-3/keyring
-
-
 ```
+
+##### 扩展MGR
+
+- 在Ceph集群的任意一台Mon节点上使用以下命令生成一个新的mgr密钥:
+```shell
+ceph auth get-or-create mgr.<新节点名称> mon 'allow profile mgr' osd 'allow *' mds 'allow *'
+```
+
+- 将mgr密钥分发到新节点(新节点操作)
+```shell
+sudo -u ceph mkdir /var/lib/ceph/mon/{cluster-name}-`hostname -s`
+cd /var/lib/ceph/mon/{cluster-name}-`hostname -s`
+sudo -u ceph touch keyring
+#将上一步生成的字符串复制到keyring文件中，注意最后不要有空行
+```
+
+- 更新集群配置：在新的mgr节点上，打开`/etc/ceph/ceph.conf`文件，并添加以下配置项：
+```shell
+[mgr]
+mgr initial modules = asx7-a,asx7-b
+```
+同步ceph.conf文件保证所有节点一致.
+
+- 启动MGR服务(新节点操作)
+```shell
+sudo systemctl start ceph-mgr@`hostname -s`
+sudo systemctl enable ceph-mgr@`hostname -s`
+```
+
+
+##### 扩展RGW
+
+参考上面的配置RGW
