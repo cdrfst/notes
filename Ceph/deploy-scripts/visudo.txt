@@ -1,0 +1,12 @@
+ecm ALL=(ALL) NOPASSWD: /usr/bin/ceph*
+ecm ALL=(ALL) NOPASSWD: /usr/bin/rados*
+ecm ALL=(ALL) NOPASSWD: /usr/bin/chown
+ecm ALL=(ALL) NOPASSWD: /usr/bin/setfacl
+ecm ALL=(ceph) NOPASSWD:/usr/bin/mkdir
+ecm ALL=(ceph) NOPASSWD:/usr/bin/systemctl
+
+
+
+给文件设置拥有者和组
+sudu chown ceph:ceph mon.map
+scp 时权限不足需要用到setfacl给ecm用户

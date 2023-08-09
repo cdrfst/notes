@@ -500,7 +500,7 @@ cd /var/lib/ceph/mgr/ceph-`hostname -s`
 ceph auth get-or-create mgr.`hostname -s` mon 'allow profile mgr' osd 'allow *' mds 'allow *' > keyring
 #此处注意keyring文件的所有者和所属组为ceph
 #启动
-ceph-mgr -i `hostname -s`
+sudo ceph-mgr -i `hostname -s` --setuser ceph --setgroup ceph
 
 ```
 
@@ -512,59 +512,12 @@ https://zhuanlan.zhihu.com/p/441588192
 yum install ceph-radosgw -y
 
 ```
-2. 建rgw相关资源池
-资源池列表及部分资源池功能介绍如下。
-
--   .rgw:region和zone配置信息。  
-    
--   .rgw.root:region和zone配置信息。  
-    
--   .rgw.control：存放notify信息。  
-    
--   .rgw.gc：用于资源回收。  
-    
--   .rgw.buckets：存放数据。  
-    
--   .rgw.buckets.index：存放元数据信息。  
-    
--   .rgw.buckets.extra：存放元数据扩展信息。  
-    
--   .log：日志存放。  
-    
--   .intent-log：日志存放。  
-    
--   .usage：存放用户已用容量信息。  
-    
--   .users：存放用户信息。  
-    
--   .users.email：存放用户E-mail信息。  
-    
--   .users.swift：存放swift类型的账号信息。  
-    
--   .users.uid：存放用户信息。
-
-```shell
-ceph osd pool create .rgw 8 8
-ceph osd pool create .rgw.root 8 8
-ceph osd pool create .rgw.control 8 8
-ceph osd pool create .rgw.gc 8 8
-ceph osd pool create .rgw.buckets 8 8
-ceph osd pool create .rgw.buckets.index 8 8
-ceph osd pool create .rgw.buckets.extra 8 8
-ceph osd pool create .log 8 8
-ceph osd pool create .intent-log 8 8
-ceph osd pool create .usage 8 8
-ceph osd pool create .users 8 8
-ceph osd pool create .users.email 8 8
-ceph osd pool create .users.swift 8 8
-ceph osd pool create .users.uid 8 8
-
-```
+2. 创建池时的错误
 创建过程会遇到这个报错，原因是每个osd默认最多只支持250个pg，这里有两种解决办法，一种是删除之前创建的pool，并新建pool时把pg设置小一点，另一种则是修改osd默认最大pg数，这里我用了第二种，修改完配置文件后，重启mon
 
 > Error ERANGE: pg_num 8 size 3 would mean 771 total pgs, which exceeds max 750 (mon_max_pg_per_osd 250 * num_in_osds 3)
 
-编辑配置文件
+	解决方案:
 
 ```text
 vim /etc/ceph/ceph.conf
@@ -586,7 +539,7 @@ chown ceph:ceph /etc/ceph/ceph.client.radosgw.keyring
 
 #生成ceph-radosgw服务对应的用户和key
 
-ceph-authtool /etc/ceph/ceph.client.radosgw.keyring -n client.rgw.`hostname -s` --gen-key
+sudo ceph-authtool /etc/ceph/ceph.client.radosgw.keyring -n client.rgw.`hostname -s` --gen-key
 #ceph-authtool /etc/ceph/ceph.client.radosgw.keyring -n client.rgw.node2 --gen-key
 #ceph-authtool /etc/ceph/ceph.client.radosgw.keyring -n client.rgw.node3 --gen-key
 
@@ -719,28 +672,27 @@ ERROR: S3 error: 403 (RequestTimeTooSkewed)
 - 随便找一台正在运行的mon节点上修改ceph.conf，增加相应的mon initial members与mon host，不再赘述。然后同步到所有节点。
 - 获取集群已有的mon.keyring
 ``` shell
-ceph auth get mon. -o mon.keyring
+sudo ceph auth get mon. -o mon.keyring
 ```
+
 - 获取集群已有的mon.map
 ```shell
-ceph mon getmap -o mon.map
+sudo ceph mon getmap -o mon.map
 ```
+
 - 创建监视数据目录
+**确定以下默认目录已经存在/var/lib/ceph/mon/{cluster-name}-{mon-id}/
+例如：/var/lib/ceph/mon/ceph-asianux76-a/**
 ```shell
-#确定以下默认目录已经存在
-#/var/lib/ceph/mon/{cluster-name}-{mon-id}/
-#例如：/var/lib/ceph/mon/ceph-asianux76-a/
-
-ceph-mon -i ceph1 --mkfs --monmap mon.map --keyring mon.keyring
-
-#以上ceph1为mon id
+sudo ceph-mon -i `hostname -s` --mkfs --monmap mon.map --keyring mon.keyring
 ```
+**以上`hostname -s`为mon id**
+
 - 启动mon节点
 ```shell
 sudo ceph-mon -i `hostname -s` --setuser ceph --setgroup ceph --public-addr 192.168.3.23:6789
-
-#注意ip为新节点ip  `hostname -s` 是mon的ID,可以任意
 ```
+**注意ip为新节点ip  `hostname -s` 是mon的ID，如果此时ceph-mon进程不存在则检查默认数据目录权限是否为ceph:ceph**
 
 ##### 扩展OSD
 
@@ -778,8 +730,8 @@ ceph auth get-or-create mgr.<新节点名称> mon 'allow profile mgr' osd 'allow
 
 - 将mgr密钥分发到新节点(新节点操作)
 ```shell
-sudo -u ceph mkdir /var/lib/ceph/mon/{cluster-name}-`hostname -s`
-cd /var/lib/ceph/mon/{cluster-name}-`hostname -s`
+sudo -u ceph mkdir /var/lib/ceph/mgr/{cluster-name}-`hostname -s`
+cd /var/lib/ceph/mgr/{cluster-name}-`hostname -s`
 sudo -u ceph touch keyring
 #将上一步生成的字符串复制到keyring文件中，注意最后不要有空行
 ```
@@ -801,3 +753,4 @@ sudo systemctl enable ceph-mgr@`hostname -s`
 ##### 扩展RGW
 
 参考上面的配置RGW
+
