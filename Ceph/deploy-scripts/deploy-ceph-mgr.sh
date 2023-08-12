@@ -34,6 +34,7 @@ execute_command "sudo chown -R ceph:ceph $MGR_DIR" "设置密钥$MGR_DIR 所有�
 execute_command "sudo setfacl -Rm u:$user:rwx /var/lib/ceph" "无法为用户 $user 添加Ceph默认目录的[读、写、执行]权限"
 
 execute_command "sudo ceph auth get-or-create mgr.$HOST_NAME mon 'allow profile mgr' osd 'allow *' mds 'allow *' > $MGR_KEYRING" "生成mgr密钥失败"
+execute_command "sudo chown -R ceph:ceph $MGR_KEYRING" "设置密钥$MGR_KEYRING 所有者和所属组失败"
 
 execute_command "sudo ceph-mgr -i $HOST_NAME --setuser ceph --setgroup ceph" "启动mgr失败"
 

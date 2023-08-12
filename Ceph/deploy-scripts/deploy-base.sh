@@ -82,7 +82,7 @@ check_exist() {
         read -p "Do you want to delete it? (y/n): " choice
         case "$choice" in
             y|Y )
-                sudo rm -rf "$1"
+                rm -rf "$1"
                 echo "File or directory '$1' deleted."
                 ;;
             n|N )

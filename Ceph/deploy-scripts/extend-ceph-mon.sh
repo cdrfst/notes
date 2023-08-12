@@ -55,6 +55,7 @@ execute_command "sudo ceph-mon -i $HOST_NAME --mkfs --monmap $MONMAP --keyring $
 #启动mon服务
 execute_command "sudo ceph-mon -i $HOST_NAME --setuser ceph --setgroup ceph --public-addr $NODE_IP:$MON_PORT" "启动mon服务失败"
 
+execute_command "sudo ceph mon enable-msgr2" "启用msgr2协议失败"
 
 script_name=$(basename "$0")
 echo "当前脚本执行完成$script_name"

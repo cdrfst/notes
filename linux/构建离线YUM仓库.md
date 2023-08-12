@@ -46,7 +46,6 @@ repotrack ansible
 # 安装yum-utils $ yum -y install yum-utils 
 # 下载 ansible 依赖包 
 yumdownloader --resolve --destdir=/tmp ansible
-
 ```
 
 参数说明：
@@ -61,7 +60,6 @@ yumdownloader --resolve --destdir=/tmp ansible
 
 ```shell
 yum -y install ansible --downloadonly --downloaddir=/tmp
-
 ```
 **注意**
 `与 yumdownloader 命令一样，也是仅会将主软件包和基于你现在的操作系统所缺少的依赖关系包一并下载。 如果已经安装则什么都不会下载!!!
@@ -71,5 +69,4 @@ yum -y install ansible --downloadonly --downloaddir=/tmp
 ```shell
 # 离线安装 
 rpm -Uvh --force --nodeps *.rpm
-
 ```

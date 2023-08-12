@@ -2,11 +2,21 @@ ecm ALL=(ALL) NOPASSWD: /usr/bin/ceph*
 ecm ALL=(ALL) NOPASSWD: /usr/bin/rados*
 ecm ALL=(ALL) NOPASSWD: /usr/bin/chown
 ecm ALL=(ALL) NOPASSWD: /usr/bin/setfacl
-ecm ALL=(ceph) NOPASSWD:/usr/bin/mkdir
-ecm ALL=(ceph) NOPASSWD:/usr/bin/systemctl
-
+ecm ALL=(ALL) NOPASSWD:/usr/bin/mkdir
+ecm ALL=(ALL) NOPASSWD:/usr/bin/systemctl
+ecm ALL=(ALL) NOPASSWD:/usr/bin/monmaptool
+ecm ALL=(ALL) NOPASSWD:/usr/sbin/ceph-volume
+ecm ALL=(ALL) NOPASSWD:/usr/bin/mv
 
 
 给文件设置拥有者和组
 sudu chown ceph:ceph mon.map
 scp 时权限不足需要用到setfacl给ecm用户
+
+环境准备：
+禁用 selinux :/etc/selinux/config 
+禁用firewalld : 
+systemctl stop firewalld
+systemctl disable firewalld
+修改主机名:hostnamectl set-hostname newname
+修改hosts:/etc/hosts

@@ -2,9 +2,9 @@
 ## 一、必备条件
 ### 1. python3
 
-**也可通过离线安装rpm包的方式统一安装
+也可通过离线安装rpm包的方式统一安装
 
-引用地址: https://blog.csdn.net/QIU176161650/article/details/118784155
+[引用地址](https://blog.csdn.net/QIU176161650/article/details/118784155)
 
 ``` shell
 #下载编译环境
@@ -53,9 +53,8 @@ systemctl stop firewalld & systemctl disable firewalld & systemctl status firewa
 ```
 ## 内网时间同步到秒
 
-https://www.cnblogs.com/xiongty/p/14886447.html
+[参考地址](https://www.cnblogs.com/xiongty/p/14886447.html)
 
-## 新建用户
 ## 加入sudoers
 ## 配置互信
 
@@ -418,7 +417,6 @@ ceph-authtool --create-keyring /tmp/ceph.mon.keyring --gen-key -n mon. --cap mon
 - 9.Generate an administrator keyring, generate a `client.admin` user and add the user to the keyring.
 ```shell
 sudo ceph-authtool --create-keyring /etc/ceph/ceph.client.admin.keyring --gen-key -n client.admin --cap mon 'allow *' --cap osd 'allow *' --cap mds 'allow *' --cap mgr 'allow *'
-
 ```
 
 - 10.Generate a bootstrap-osd keyring, generate a `client.bootstrap-osd` user and add the user to the keyring.
@@ -611,7 +609,10 @@ systemctl start ceph-radosgw@rgw.`hostname -s` && systemctl enable ceph-radosgw@
 1. 错误:"Module 'restful' has failed dependency: No module named 'pecan'"
 此时已经自动安装了python3.6
 安装相应的python模块
-解决：``pip3 install pecan werkzeug
+解决：
+```shell
+pip3 install pecan werkzeug
+```
 
 
 注意，这里需要使用pip3进行安装，否则不生效，如果安装完成之后还存在问题，需要重启系统生效。  
@@ -620,7 +621,11 @@ systemctl start ceph-radosgw@rgw.`hostname -s` && systemctl enable ceph-radosgw@
 2. 错误:"monitors have not enabled msgr2";此问题在后续扩展添加的mon中可能还会存在,暂未找到完美解决办法
 [https://docs.ceph.com/en/pacific/rados/configuration/msgr2/](https://docs.ceph.com/en/pacific/rados/configuration/msgr2/)  [https://docs.ceph.com/en/pacific/rados/operations/health-checks/#mon-msgr2-not-enabled](https://docs.ceph.com/en/pacific/rados/operations/health-checks/#mon-msgr2-not-enabled) 
 
-解决：``ceph mon enable-msgr2
+解决：
+```shell
+ceph mon enable-msgr2
+```
+
 
 3. 错误：“mons are allowing insecure global_id reclaim”  
 解决：``ceph config set mon auth_allow_insecure_global_id_reclaim false
@@ -699,11 +704,10 @@ sudo ceph-mon -i `hostname -s` --setuser ceph --setgroup ceph --public-addr 192.
 ###### 添加方式一：添加后osd立刻生效，会触发数据均衡
 ```shell
 #1.登陆原集群任意osd节点
-scp /var/lib/ceph/bootstrap-osd/keyring newnode:$PWD
+scp /var/lib/ceph/bootstrap-osd/ceph.keyring newnode:$PWD
 scp /etc/ceph/ceph.client.admin.keyring /etc/ceph/ceph.conf newnode:$PWD
 
 ceph-volume lvm create --data /dev/sdb(此处替换成新节点设备名)
-
 ```
 ###### 添加方式二：添加后暂缓生效（以下暂未成功）
 ```shell

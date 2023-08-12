@@ -46,7 +46,7 @@ execute_command "sudo ceph-authtool $MON_KEYRING --import-keyring $ADMIN_KEYRING
 execute_command "sudo ceph-authtool $MON_KEYRING --import-keyring $BOOTSTRAP_OSD_KEYRING" "将$BOOTSTRAP_OSD_KEYRING导入到$MON_KEYRING失败"
 
 
-execute_command "sudo monmaptool --create --add $HOST_NAME $NODE_IP --fsid $CLUSTER_ID $MONMAP --clobber" "生成monitor map文件$MONMAP失败"
+execute_command "sudo monmaptool --create --add $HOST_NAME $NODE_IP --fsid $CLUSTER_ID $MONMAP" "生成monitor map文件$MONMAP失败"
 execute_command "sudo chown ceph:ceph $MONMAP" "设置密钥$MONMAP 所有者和所属组失败"
 
 execute_command "create_folder $MON_DIR" "创建文件夹$MON_DIR失败"
@@ -57,7 +57,7 @@ execute_command "sudo systemctl start ceph-mon@$HOST_NAME" "启动mon服务失�
 
 execute_command "sudo systemctl enable ceph-mon@$HOST_NAME" "设置mon服务自启动失败"
 
-
+execute_command "sudo ceph mon enable-msgr2" "启用msgr2协议失败"
 
 script_name=$(basename "$0")
 echo "当前脚本执行完成$script_name"
