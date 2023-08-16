@@ -3,6 +3,14 @@
 set -u
 set -e
 
+RED='\e[31m'
+RESET='\e[0m'
+
+#此句输出红色
+#echo -e "${RED}This is red text${RESET}"
+
+
+
 OP_USER="$USER"
 #集群ID，必须与/etc/ceph/ceph.conf中的fsid保持一致
 CLUSTER_ID='a7f64266-0894-4f1e-a635-d0aeaca0e993';

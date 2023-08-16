@@ -515,9 +515,9 @@ yum install ceph-radosgw -y
 
 > Error ERANGE: pg_num 8 size 3 would mean 771 total pgs, which exceeds max 750 (mon_max_pg_per_osd 250 * num_in_osds 3)
 
-	解决方案:
+解决方案:
 
-```text
+```shell
 vim /etc/ceph/ceph.conf
 [global]
 mon_max_pg_per_osd = 1000
@@ -526,13 +526,11 @@ mon_max_pg_per_osd = 1000
 systemctl restart ceph-mon@`hostname -s`
 ```
 
-可以使用`rados lspools`查看是否创建成功
-
 
 ```shell
 #创建keying
-ceph-authtool --create-keyring /etc/ceph/ceph.client.radosgw.keyring
-chown ceph:ceph /etc/ceph/ceph.client.radosgw.keyring
+sudo ceph-authtool --create-keyring /etc/ceph/ceph.client.radosgw.keyring
+sudo chown ceph:ceph /etc/ceph/ceph.client.radosgw.keyring
 
 
 #生成ceph-radosgw服务对应的用户和key
@@ -542,12 +540,12 @@ sudo ceph-authtool /etc/ceph/ceph.client.radosgw.keyring -n client.rgw.`hostname
 #ceph-authtool /etc/ceph/ceph.client.radosgw.keyring -n client.rgw.node3 --gen-key
 
 # 添加用户访问权限
-ceph-authtool -n client.rgw.`hostname -s` --cap osd 'allow rwx' --cap mon 'allow rwx' /etc/ceph/ceph.client.radosgw.keyring
+sudo ceph-authtool -n client.rgw.`hostname -s` --cap osd 'allow rwx' --cap mon 'allow rwx' /etc/ceph/ceph.client.radosgw.keyring
 #ceph-authtool -n client.rgw.node2 --cap osd 'allow rwx' --cap mon 'allow rwx' /etc/ceph/ceph.client.radosgw.keyring
 #ceph-authtool -n client.rgw.node3 --cap osd 'allow rwx' --cap mon 'allow rwx' /etc/ceph/ceph.client.radosgw.keyring
 
 #将keyring导入集群中
-ceph -k /etc/ceph/ceph.client.admin.keyring auth add client.rgw.`hostname -s` -i /etc/ceph/ceph.client.radosgw.keyring
+sudo ceph -k /etc/ceph/ceph.client.admin.keyring auth add client.rgw.`hostname -s` -i /etc/ceph/ceph.client.radosgw.keyring
 #ceph -k /etc/ceph/ceph.client.admin.keyring auth add client.rgw.node2 -i /etc/ceph/ceph.client.radosgw.keyring
 #ceph -k /etc/ceph/ceph.client.admin.keyring auth add client.rgw.node3 -i /etc/ceph/ceph.client.radosgw.keyring
 
@@ -574,10 +572,11 @@ rgw_frontends = civetweb port=8080
 EOF
 
 #创建日志目录
-mkdir /var/log/radosgw
-chown ceph:ceph /var/log/radosgw
+sudo mkdir /var/log/radosgw
+sudo chown ceph:ceph /var/log/radosgw
+
 #启动rgw服务
-systemctl start ceph-radosgw@rgw.`hostname -s` && systemctl enable ceph-radosgw@rgw.`hostname -s`
+sudo systemctl start ceph-radosgw@rgw.`hostname -s` && sudo systemctl enable ceph-radosgw@rgw.`hostname -s`
 
 ```
 此时存在以下错误和警告:
@@ -610,11 +609,25 @@ systemctl start ceph-radosgw@rgw.`hostname -s` && systemctl enable ceph-radosgw@
 此时已经自动安装了python3.6
 安装相应的python模块
 解决：
+1.1. 方式一：在线安装：需要root用户执行，否则可能安装失败
 ```shell
 pip3 install pecan werkzeug
 ```
+1.2.方式二：离线安装：
+- 下载离线包
+```shell
+cd dep-ceph-pecan
+pip3 download pecan werkzeug
+```
+- 安装离线包
+```shell
+cd dep-ceph-pecan
+pip3 install ./*
+```
+**注意以上以来安装后需要重启机器生效**
 
 
+```
 注意，这里需要使用pip3进行安装，否则不生效，如果安装完成之后还存在问题，需要重启系统生效。  
 这里还需要安装`werkzeug`模块
 

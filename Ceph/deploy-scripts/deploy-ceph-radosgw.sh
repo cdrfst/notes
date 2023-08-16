@@ -14,11 +14,11 @@ check_exist $RADOSGW_KEYRING
 
 
 #确认变量信息
-echo "确认已经修改了ceph.conf !!!,否则RGW服务无法启动"
 echo "HOST_NAME $HOST_NAME"
 echo "RADOSGW_KEYRING $RADOSGW_KEYRING"
 echo "RADOSGW_LOG_DIR $RADOSGW_LOG_DIR"
 echo "ADMIN_KEYRING $ADMIN_KEYRING"
+echo -e "${RED}确认已经修改了ceph.conf !!!,否则RGW服务无法启动${RESET}"
 
 
 confirm_execution "确认以上变量值是否正确？y/n" "用户选择了否。"
@@ -53,4 +53,5 @@ execute_command "sudo systemctl enable ceph-radosgw@rgw.$HOST_NAME" "设置自�
 
 script_name=$(basename "$0")
 echo "当前脚本执行完成$script_name"
-echo "如果当前RGW服务正常，端口无法访问可尝试重启机器解决!"
+echo "如果当前RGW服务正常，端口无法访问可尝试执行赋权脚本/重启机器解决!"
+

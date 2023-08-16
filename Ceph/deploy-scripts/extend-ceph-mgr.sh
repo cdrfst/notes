@@ -2,10 +2,10 @@
 
 source ./deploy-base.sh
 
-: `
-随便找一台正在运行的mon节点上修改ceph.conf，增加相应的mon initial members与mon host，不再赘述。然后同步到所有节点。
-只要是节点的/etc/ceph 目录下存在ceph.conf 和 ceph.client.admin.keyring 即可.
-`
+
+#随便找一台正在运行的mon节点上修改ceph.conf，增加相应的mon initial members与mon host，不再赘述。然后同步到所有节点。
+#只要是节点的/etc/ceph 目录下存在ceph.conf 和 ceph.client.admin.keyring 即可.
+
 
 
 #确认本机IP
@@ -20,6 +20,7 @@ echo "HOST_NAME $HOST_NAME"
 echo "MGR_DIR $MGR_DIR"
 echo "MGR_KEYRING $MGR_KEYRING"
 echo "user $user"
+echo -e "${RED}执行一次赋权脚本${RESET}"
 
 
 confirm_execution "确认以上变量值是否正确？y/n" "用户选择了否。"

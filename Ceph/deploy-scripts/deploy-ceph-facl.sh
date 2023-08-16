@@ -2,7 +2,6 @@
 
 source ./deploy-base.sh
 
-user=$USER
 
 echo "当前用户 $user"
 

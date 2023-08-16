@@ -7,16 +7,19 @@ ecm ALL=(ALL) NOPASSWD:/usr/bin/systemctl
 ecm ALL=(ALL) NOPASSWD:/usr/bin/monmaptool
 ecm ALL=(ALL) NOPASSWD:/usr/sbin/ceph-volume
 ecm ALL=(ALL) NOPASSWD:/usr/bin/mv
+ecm ALL=(ALL) NOPASSWD:/usr/sbin/reboot
 
-
-给文件设置拥有者和组
+1.需要在/var/lib/ceph/目录下新建文件夹和配置文件
+2.给文件设置拥有者和组
 sudu chown ceph:ceph mon.map
-scp 时权限不足需要用到setfacl给ecm用户
+3.scp 时,目的地节点ecm用户权限不足需要用到setfacl给ecm用户设置响应目录权限（/etc/ceph以及/var/lib/ceph）
+4.需要重启机器权限
 
 环境准备：
-禁用 selinux :/etc/selinux/config 
-禁用firewalld : 
-systemctl stop firewalld
-systemctl disable firewalld
-修改主机名:hostnamectl set-hostname newname
-修改hosts:/etc/hosts
+1.禁用 selinux :/etc/selinux/config  (需重启)
+2.禁用firewalld : 
+   systemctl stop firewalld
+   systemctl disable firewalld
+3.修改主机名:hostnamectl set-hostname newname
+4.修改hosts:/etc/hosts
+5.修改/etc/sudoers
