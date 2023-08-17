@@ -1,23 +1,3 @@
-# 修改更新源
-
-## Debian系统源（阿里云源）和proxmox源
-vi /etc/apt/sources.list
-
-``` shell
-#deb http://ftp.debian.org/debian buster main contrib
-#deb http://ftp.debian.org/debian buster-updates main contrib
-# security updates
-#deb http://security.debian.org buster/updates main contrib
-
-# debian aliyun source
-deb https://mirrors.aliyun.com/debian buster main contrib non-free
-deb https://mirrors.aliyun.com/debian buster-updates main contrib non-free
-deb https://mirrors.aliyun.com/debian-security buster/updates main contrib non-free
-
-# proxmox source
-# deb http://download.proxmox.com/debian/pve buster pve-no-subscription
-deb https://mirrors.ustc.edu.cn/proxmox/debian/pve buster pve-no-subscription
-```
 
 ## 去除Proxmox企业源
 vi /etc/apt/sources.list.d/pve-enterprise.list
@@ -25,6 +5,31 @@ vi /etc/apt/sources.list.d/pve-enterprise.list
 #deb https://enterprise.proxmox.com/debian/pve buster pve-enterprise
 ```
 
+# 修改更新源
+
+
+``` shell
+wget https://mirrors.ustc.edu.cn/proxmox/debian/proxmox-release-bullseye.gpg -O /etc/apt/trusted.gpg.d/proxmox-release-bullseye.gpg
+echo "deb https://mirrors.ustc.edu.cn/proxmox/debian/pve bullseye pve-no-subscription" > /etc/apt/sources.list.d/pve-no-subscription.list     #中科大源
+echo "deb https://mirrors.ustc.edu.cn/proxmox/debian/ceph-pacific bullseye main" > /etc/apt/sources.list.d/ceph.list     #中科大源
+sed -i.bak "s#http://download.proxmox.com/debian#https://mirrors.ustc.edu.cn/proxmox/debian#g" /usr/share/perl5/PVE/CLI/pveceph.pm     #中科大源
+sed -i.bak "s#ftp.debian.org/debian#mirrors.aliyun.com/debian#g" /etc/apt/sources.list     #阿里Debian源
+sed -i "s#security.debian.org#mirrors.aliyun.com/debian-security#g" /etc/apt/sources.list     #阿里Debian源
+apt update && apt dist-upgrade
+```
+
+
+# 加速CT Templates
+
+如果你需要加速 Proxmox 网页端下载 CT Templates，可以替换 CT Templates 的源为 [https://mirrors.tuna.tsinghua.edu.cn](https://mirrors.tuna.tsinghua.edu.cn/)。  
+具体方法：将 `/usr/share/perl5/PVE/APLInfo.pm` 文件中默认的源地址 `http://download.proxmox.com` 替换为 `https://mirrors.tuna.tsinghua.edu.cn/proxmox` 即可。  
+可以使用如下命令修改：
+```shell
+cp /usr/share/perl5/PVE/APLInfo.pm /usr/share/perl5/PVE/APLInfo.pm_back
+sed -i 's|http://download.proxmox.com|https://mirrors.tuna.tsinghua.edu.cn/proxmox|g' /usr/share/perl5/PVE/APLInfo.pm
+```
+
+针对 `/usr/share/perl5/PVE/APLInfo.pm` 文件的修改，重启后生效。
 
 # 安装Docker
 参考: https://docs.docker.com/engine/install/debian/
@@ -72,3 +77,4 @@ qm unlock 100
 # qm delsnapshot VMID snapshotname --force
 qm delsnapshot 100 testsnapshot --force
 ```
+
