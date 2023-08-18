@@ -6,19 +6,21 @@
 yum install keepalived haproxy  -y
 ```
 
+## 修改linux配置
+
 选取两个均衡节点(均衡节点不能和rgw节点重合)，下面在均衡节点（LB）执行。
 
 开启linux ip转发功能
 
 ```
-echo "net.ipv4.ip_forward = 1" >> etc/sysctl.conf
+echo "net.ipv4.ip_forward = 1" >> /etc/sysctl.conf
 sysctl -p
 ```
 
 允许绑定到非本地ip
 
 ```
-echo "net.ipv4.ip_nonlocal_bind = 1" >> etc/sysctl.conf
+echo "net.ipv4.ip_nonlocal_bind = 1" >> /etc/sysctl.conf
 sysctl -p
 ```
 
@@ -27,11 +29,12 @@ sysctl -p
 ```
 /usr/sbin/sysctl net.ipv4.ip_nonlocal_bind
 /usr/sbin/sysctl net.ipv4.ip_forward
-cat proc/sys/net/ipv4/ip_forward
+cat /proc/sys/net/ipv4/ip_forward
 ```
 
 查看是否看起了ip转发功能  
 如果上述文件中的值为0,说明禁止进行IP转发；如果是1,则说明IP转发功能已经打开。
+**其实经过测试不配置上面的 IP转发和允许绑定到非本地IP 对负载均衡也没啥影响**
 
 ## 修改HAProxy配置
 ```shell
