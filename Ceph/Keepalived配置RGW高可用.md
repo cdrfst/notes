@@ -21,9 +21,9 @@ yum install -y libnl3-devel libnfnetlink-devel
 
 ### 安装Keepalived
 ```shell
-wget http://www.keepalived.org/software/keepalived-1.4.2.tar.gz
-tar -zxvf keepalived-1.4.2.tar.gz
-cd keepalived-1.4.2
+wget http://www.keepalived.org/software/keepalived-2.2.7.tar.gz --no-check-certificate
+tar -zxvf keepalived-2.2.7.tar.gz
+cd keepalived-2.2.7
 ./configure --prefix=/usr/local/keepalived
 make && make install
 ```
@@ -32,17 +32,17 @@ make && make install
 
 ``` shell
 mkdir /etc/keepalived/
-cp /root/keepalived-1.4.2/keepalived/etc/init.d/keepalived /etc/init.d/
-cp /root/keepalived-1.4.2/keepalived/etc/sysconfig/keepalived /etc/sysconfig/
-cp /usr/local/keepalived/etc/keepalived/keepalived.conf /etc/keepalived/ 
+cp /root/keepalived-2.2.7/keepalived/etc/init.d/keepalived /etc/init.d/
+cp /root/keepalived-2.2.7/keepalived/etc/sysconfig/keepalived /etc/sysconfig/
+cp /usr/local/keepalived/etc/keepalived/keepalived.conf.sample /etc/keepalived/keepalived.conf
 ```
 
 ### 修改Keepalived配置
 - 配置asx7-a 节点
-```shell
 cp /etc/keepalived/keepalived.conf /etc/keepalived/keepalived.conf.bak
 cat /etc/keepalived/keepalived.conf
 
+```shell
 ! Configuration File for keepalived
 
 global_defs {
@@ -92,10 +92,10 @@ chmod +x /usr/local/keepalived/sbin/check_rgw.sh
 ```
 
 - 配置asx7-b 节点
-```shell
-$ cp /etc/keepalived/keepalived.conf /etc/keepalived/keepalived.conf.bak
-$ cat /etc/keepalived/keepalived.conf
+cp /etc/keepalived/keepalived.conf /etc/keepalived/keepalived.conf.bak
+cat /etc/keepalived/keepalived.conf
 
+```shell
 ! Configuration File for keepalived
 
 global_defs {
@@ -130,6 +130,8 @@ check_rgw.sh 脚本赋予权限，同上一个节点
 
 ### 启动Keepalived
 启动 asx7-a和asx7-b两个节点的服务
+**启动前记得修改配置文件中的interface**
+
 ```shell
 systemctl start keepalived
 ```

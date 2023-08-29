@@ -30,4 +30,3 @@ ceph auth del osd.0
 
 6：删除crush map中对应OSD条目
 ceph crush remove osd.0
-
