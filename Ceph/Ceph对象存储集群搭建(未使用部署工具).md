@@ -687,6 +687,8 @@ ERROR: S3 error: 403 (RequestTimeTooSkewed)
 #### 添加新机器到集群
 
 ##### 扩展MON
+[官方文档](https://docs.ceph.com/en/octopus/rados/operations/add-or-rm-mons/)
+
 - 随便找一台正在运行的mon节点上修改ceph.conf，增加相应的mon initial members与mon host，不再赘述。然后同步到所有节点。
 - 获取集群已有的mon.keyring
 ``` shell
