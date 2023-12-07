@@ -220,7 +220,7 @@ sudo yum install -y ceph
 sudo yum -y install --downloadonly --downloaddir=/home/tiaf/cephcentos7/ceph/ ceph  ceph-radosgw
 
 #2.1.本地安装
-sudo yum localinstall *.rpm
+sudo yum localinstall -y --nogpgcheck *.rpm
 ```
 
 

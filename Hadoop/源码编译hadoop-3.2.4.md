@@ -8,12 +8,12 @@
 
 ## 建议使用此顺序，否则可能出现依赖问题
 ```shell
-yum install -y gcc gcc-c++
-yum install -y make
-yum install -y autoconf automake libtool curl
-yum install -y lzo-devel zlib-devel openssl openssl-devel ncurses-devel
-yum install -y snappy snappy-devel bzip2 bzip2-devel lzo lzo-devel lzop libXtst
-yum install -y patch
+sudo yum install -y gcc gcc-c++
+sudo yum install -y make
+sudo yum install -y autoconf automake libtool curl
+sudo yum install -y lzo-devel zlib-devel openssl openssl-devel ncurses-devel
+sudo yum install -y snappy snappy-devel bzip2 bzip2-devel lzo lzo-devel lzop libXtst
+sudo yum install -y patch
 ```
 
 ## Protobuf-2.5.0 (同3.7.1)
@@ -21,7 +21,7 @@ yum install -y patch
 ```shell
 tar -zxvf protobuf-2.5.0.tar.gz
 cd protobuf-2.5.0
-mkdir -p /usr/local/protobuf
+sudo mkdir -p /usr/local/protobuf
 ./configure --prefix=/usr/local/protobuf
 sudo make 
 sudo make check #检测完成之后使用echo $?验证，返回0则表示成功
@@ -53,9 +53,9 @@ source /etc/profile
 
 ```shell
 # 解压
-tar -xvf cmake-3.19.4-Linux-x86_64.tar.gz -C /opt/
+sudo tar -xvf cmake-3.19.4-Linux-x86_64.tar.gz -C /opt/
 # 而后构建链接
-ln -s /opt/cmake-3.19.4-Linux-x86_64/bin/cmake /usr/bin/cmake
+sudo ln -s /opt/cmake-3.19.4-Linux-x86_64/bin/cmake /usr/bin/cmake
 ```
 
 ## 安装Snappy-1.1.3
@@ -65,12 +65,12 @@ ln -s /opt/cmake-3.19.4-Linux-x86_64/bin/cmake /usr/bin/cmake
 tar zxvf snappy-1.1.3.tar.gz 
 
 #编译安装
-cd /export/server/snappy-1.1.3
-./configure
-make &amp;&amp; make install
+cd snappy-1.1.3
+sudo ./configure
+sudo make ;sudo make install
 
 #验证是否安装
-ls -lh /usr/local/lib |grep snappy
+sudo ls -lh /usr/local/lib |grep snappy
 -rw-r--r-- 1 root root 511K Nov  4 17:13 libsnappy.a
 -rwxr-xr-x 1 root root  955 Nov  4 17:13 libsnappy.la
 lrwxrwxrwx 1 root root   18 Nov  4 17:13 libsnappy.so -> libsnappy.so.1.3.0
@@ -81,8 +81,22 @@ lrwxrwxrwx 1 root root   18 Nov  4 17:13 libsnappy.so.1 -> libsnappy.so.1.3.0
 
 # 开始编译
 
+## Hadoop
+
 ```shell
-mvn clean package -Pdist,native,docs -DskipTests -Dtar -Dbundle.snappy -Dsnappy.lib=/usr/local/lib
+mvn clean package -Pdist,native -DskipTests -Dtar -Dbundle.snappy -Dsnappy.lib=/usr/local/lib
+```
+
+## Hbase
+**默认依赖hadoop2.10.2编译，此处指定-Dhadoop.profile=3.0表示依赖hadoop3.x(具体版本和不同hbase源码版本有关请查看其根pom.xml文件)**
+```shell
+mvn clean package -DskipTests assembly:single -Dhadoop.profile=3.0
+```
+
+## Hbase Operator Tools
+
+```shell
+mvn clean package
 ```
 
 参数说明：
