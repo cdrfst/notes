@@ -17,6 +17,8 @@ CLUSTER_ID='a7f64266-0894-4f1e-a635-d0aeaca0e993';
 CLUSTER_NAME="ceph"
 ADMIN_KEYRING=/etc/ceph/ceph.client.admin.keyring
 user=$USER
+NODE_IP=`hostname -i | grep -E "([0-9]{1,3}\.){3}[0-9]{1,3}" | grep -oE "([0-9]{1,3}\.){3}[0-9]{1,3}"`
+
 
 # Function to execute command with error handling
 execute_command() {

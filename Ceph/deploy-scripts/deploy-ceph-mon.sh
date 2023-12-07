@@ -4,7 +4,6 @@ source ./deploy-base.sh
 
 #确认本机IP
 HOST_NAME=`hostname -s`
-NODE_IP=`hostname -i`
 MON_DIR=/var/lib/ceph/mon/$CLUSTER_NAME-$HOST_NAME
 MON_KEYRING=/tmp/ceph.mon.keyring
 MONMAP=/tmp/monmap
